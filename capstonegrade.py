@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Title for the grading form
-st.title('Spring Capstone 2 Midterm Review and Feedback Session')
+st.title('Capstone 2 Midterm Feedback')
 
 # Input fields for instructor, student, and project names
 col1, _ = st.columns([1, 1])  # Adjust for half-width for the instructor name
@@ -27,14 +27,14 @@ def create_evaluation_block(rubric_name, description, score_name, improvement_na
 
 # Detailed rubric descriptions with formatting
 rubrics = {
-    "Evidence of Value Creation": """
+    "1.Evidence of Value Creation": """
     **User/prototype testing process that supports your insights and value map including how you are measuring that value and impact. Use of Prototypes & MVP to test.**
     - Validation of customer/user needs
     - Benchmarking against existing solutions
     - Quantitative metrics/data demonstrating improvement
     - Qualitative feedback from users/experts/partners
     """,
-    "Connection to Business Context": """
+    "2.Connection to Business Context": """
     **Understanding of Commercial context and demand for solution**
     - Market analysis - size, competitors, trends
     - Brandenburger Value map (not value proposition canvas)
@@ -44,14 +44,14 @@ rubrics = {
     - Financial / sustainability projections
     - Potential funding sources/investors
     """,
-    "Spoken Presentation": """
+    "3.Spoken Presentation": """
     **Current ability to present your project to others**
     - Clarity of speech and enunciation
     - Pacing and ability to stay within time constraints
     - Poise and presence
     - Ability to effectively respond to questions
     """,
-    "Visual Communication and Design": """
+    "4.Visual Communication and Design": """
     **How the visual communication impacts understanding.**
     - Visual appeal - use of color, images, layout, and white space to clearly communicate
     - Clarity and readability of charts/graphs/diagrams
