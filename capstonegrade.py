@@ -126,23 +126,25 @@ def generate_pdf(data, scores_feedback):
     # Helper function to add paragraphs to the Story list with dynamic spacing
     def add_paragraph(text, style, space_after=0.1):
         Story.append(Paragraph(text, style))
-        Story.append(Spacer(1, space_after * inch))  # Dynamically add vertical space after each paragraph
+        Story.append(Spacer(1, space_after * inch))
 
     # Basic Info
     add_paragraph(f"<b>Instructor Name:</b> {data['Instructor Name']}", bold_style)
     add_paragraph(f"<b>Student Name:</b> {data['Student Name']}", bold_style)
     add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.2)
 
-    # Scores, Improvements, and Strengths
-    for rubric_index, (rubric, score, improvement, strength) in enumerate(scores_feedback, start=1):
-        print("Debug inside generate_pdf:", rubric, score, improvement, strength)
+    # Iterate without expecting rubric name
+    for index, (score, improvement, strength) in enumerate(scores_feedback, start=1):
+        # Use index or another method to reference the rubric if needed
+        rubric = f"Rubric {index}"  # Example placeholder if rubric name is needed
         add_paragraph(f"<b>{rubric} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
         add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
-        add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if rubric_index < len(scores_feedback) else 0.1)
+        add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if index < len(scores_feedback) else 0.1)
 
     doc.build(Story)
     buffer.seek(0)
     return buffer.getvalue()
+
 
 
 
