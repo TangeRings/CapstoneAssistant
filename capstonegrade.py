@@ -112,45 +112,37 @@ if student_name_keyed in student_info:
     matching_email = student_info[student_name_keyed]["email"]
 
 
-
-
-def generate_pdf(data, scores_feedback_tuples):
+def generate_pdf(data, scores_feedback):
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
 
-    # Custom styles for different sections
-    header_style = ParagraphStyle('header_style', parent=styles['Heading1'], fontSize=12, spaceAfter=6)
+    # Define custom styles
     normal_style = styles['Normal']
     bold_style = ParagraphStyle('bold_style', parent=styles['Normal'], fontName='Helvetica-Bold')
 
     Story = []
 
-    # Function to add paragraphs with specific styles and spacing
+    # Helper function to add paragraphs to the Story list with dynamic spacing
     def add_paragraph(text, style, space_after=0.1):
-        p = Paragraph(text, style)
-        Story.append(p)
-        Story.append(Spacer(1, space_after * inch))
+        Story.append(Paragraph(text, style))
+        Story.append(Spacer(1, space_after * inch))  # Dynamically add vertical space after each paragraph
 
-    # Add basic info at the top
-    add_paragraph(f"<b>Instructor Name:</b> {data['Instructor Name']}", bold_style, space_after=0.2)
-    add_paragraph(f"<b>Student Name:</b> {data['Student Name']}", bold_style, space_after=0.2)
-    add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.4)
+    # Basic Info
+    add_paragraph(f"<b>Instructor Name:</b> {data['Instructor Name']}", bold_style)
+    add_paragraph(f"<b>Student Name:</b> {data['Student Name']}", bold_style)
+    add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.2)
 
-    # Loop through each rubric and add its scores and feedback
-    for rubric, (score, improvement, strength) in zip(data.keys(), scores_feedback_tuples):
-        add_paragraph(f"{rubric} - Score: {score if score != 'Select' else 'Not Selected'}", header_style, space_after=0.1)
-        if improvement:  # Only add if there's content
-            add_paragraph(f"<b>Improvement:</b> {improvement}", normal_style, space_after=0.1)
-        if strength:  # Only add if there's content
-            add_paragraph(f"<b>Strength:</b> {strength}", normal_style, space_after=0.3)
+    # Scores, Improvements, and Strengths
+    for rubric_index, (rubric, details) in enumerate(scores_feedback.items(), start=1):
+        score, improvement, strength = details
+        add_paragraph(f"<b>{rubric} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
+        add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
+        add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if rubric_index < len(scores_feedback) else 0.1)
 
-    # Build the PDF
     doc.build(Story)
     buffer.seek(0)
     return buffer.getvalue()
-
-
 
 
 
