@@ -208,6 +208,7 @@ if st.button('Generate Feedback', key='submit_review'):
         st.session_state['scores_feedback_tuples'] = scores_feedback_tuples
 
         # Generate PDF and store the bytes
+        print(scores_feedback_tuples)
         pdf_bytes = generate_pdf(review_data, scores_feedback_tuples)
         st.session_state['pdf_bytes'] = pdf_bytes
         st.download_button("Download Review PDF", pdf_bytes, f"{student_name}_review.pdf", "application/pdf")
