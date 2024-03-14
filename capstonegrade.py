@@ -99,7 +99,7 @@ rubrics = {
 
 
 # Create blocks for each evaluation rubric and collect scores and feedback
-scores_and_feedback = [create_evaluation_block(rubric, description, f"Score for {rubric}", f"Improvement for {rubric}", f"Strength for {rubric}") for rubric, description in rubrics.items()]
+scores_and_feedback = [(rubric,) + create_evaluation_block(rubric, description, f"Score for {rubric}", f"Improvement for {rubric}", f"Strength for {rubric}") for rubric, description in rubrics.items()]
 
 
 
@@ -188,13 +188,12 @@ def append_data_to_sheet(data):
 
      
 
-# Initialize the list to collect feedback tuples
 scores_feedback_tuples = []
 
-# Iterate over the rubrics and corresponding feedback
 for item in scores_and_feedback:
-    rubric_name, score, improvement, strength = item  # Assuming scores_and_feedback matches rubrics
+    rubric_name, score, improvement, strength = item
     scores_feedback_tuples.append((rubric_name, score, improvement, strength))
+
 
 
 
