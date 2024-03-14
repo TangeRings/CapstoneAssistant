@@ -135,6 +135,7 @@ def generate_pdf(data, scores_feedback):
 
     # Scores, Improvements, and Strengths
     for rubric_index, (rubric, score, improvement, strength) in enumerate(scores_feedback, start=1):
+        print("Debug inside generate_pdf:", rubric, score, improvement, strength)
         add_paragraph(f"<b>{rubric} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
         add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
         add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if rubric_index < len(scores_feedback) else 0.1)
@@ -191,6 +192,7 @@ scores_feedback_tuples = []
 for score_data in scores_and_feedback:
     score, improvement, strength = score_data  # Unpack the tuple for each rubric
     scores_feedback_tuples.append((score, improvement, strength))
+
 
 # Generate feedback and email logic
 if st.button('Generate Feedback', key='submit_review'):
