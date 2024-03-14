@@ -142,11 +142,14 @@ def generate_pdf(data, scores_feedback_tuples):
     add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.2)
 
     # Scores, Improvements, and Strengths
+    # Scores, Improvements, Strengths, and Rubric Titles
     for score_info in scores_feedback_tuples:
-        score, improvement, strength = score_info  # Unpacking each tuple
+        rubric_title, score, improvement, strength = score_info  # Adjusted to unpack rubric_title
+        add_paragraph(f"<b>Rubric:</b> {rubric_title}", bold_style)  # Include the rubric title in the PDF
         add_paragraph(f"<b>Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
         add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'No Comment'}", normal_style)
         add_paragraph(f"<b>Strength:</b> {strength if strength else 'No Comment'}", normal_style, space_after=0.1)
+
 
     doc.build(Story)
     buffer.seek(0)
@@ -197,10 +200,14 @@ def append_data_to_sheet(data):
      
 
 # Collect scores and feedback for each evaluation rubric
+# This is an example adjustment. You'll need to integrate rubric titles into your actual data collection logic.
 scores_feedback_tuples = []
-for score_data in scores_and_feedback:
-    score, improvement, strength = score_data  # Unpack the tuple for each rubric
-    scores_feedback_tuples.append((score, improvement, strength))
+for rubric, description in rubrics.items():
+    score, improvement, strength = scores_and_feedback[rubric]  # Assuming this is how you'd get the corresponding scores
+    scores_feedback_tuples.append((rubric, score, improvement, strength))
+
+
+
 
 # Generate feedback and email logic
 if st.button('Generate Feedback', key='submit_review'):
