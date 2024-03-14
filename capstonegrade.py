@@ -136,8 +136,8 @@ def generate_pdf(data, scores_feedback):
     # Use actual rubric names from the tuples
     for rubric_name, score, improvement, strength in scores_feedback:
         add_paragraph(f"<b>{rubric_name} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
-        add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
-        add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2)
+        add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'No Comment'}", normal_style)
+        add_paragraph(f"<b>Strength:</b> {strength if strength else 'No Comment'}", normal_style, space_after=0.2)
 
     doc.build(Story)
     buffer.seek(0)
