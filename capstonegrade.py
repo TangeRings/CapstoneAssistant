@@ -9,11 +9,9 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from email.mime.base import MIMEBase
 from email import encoders
-from oauth2client.client import ServiceAccountCredentials
 import json
 from google.oauth2.service_account import Credentials
 import gspread
