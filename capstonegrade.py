@@ -15,6 +15,8 @@ from email.mime.base import MIMEBase
 from email import encoders
 from oauth2client.client import ServiceAccountCredentials
 import json
+from google.oauth2.service_account import Credentials
+import gspread
 
 
 # Initialize session state variables
@@ -178,9 +180,9 @@ def send_email(student_email, pdf_data):
         
 def append_data_to_sheet(data):
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
     client = gspread.authorize(creds)
-    sheet = client.open('capstone2mid').sheet1  # Replace with your sheet's name
+    sheet = client.open('capstone2mid').sheet1 
 
     # Find the first empty row
     all_rows = sheet.get_all_values()
