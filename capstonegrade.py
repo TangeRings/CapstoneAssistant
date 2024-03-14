@@ -134,8 +134,7 @@ def generate_pdf(data, scores_feedback):
     add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.2)
 
     # Scores, Improvements, and Strengths
-    for rubric_index, (rubric, details) in enumerate(scores_feedback.items(), start=1):
-        score, improvement, strength = details
+    for rubric_index, (rubric, score, improvement, strength) in enumerate(scores_feedback, start=1):
         add_paragraph(f"<b>{rubric} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
         add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
         add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if rubric_index < len(scores_feedback) else 0.1)
