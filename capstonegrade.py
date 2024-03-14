@@ -2,36 +2,65 @@ import streamlit as st
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import io
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.units import inch
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
+from email.mime.base import MIMEBase
+from email import encoders
+
+
+# Initialize session state variables
+if 'review_submitted' not in st.session_state:
+    st.session_state.review_submitted = False
+if 'pdf_bytes' not in st.session_state:
+    st.session_state.pdf_bytes = None
+if 'inferred_full_name' not in st.session_state:
+    st.session_state.inferred_full_name = ""
+if 'student_email' not in st.session_state:
+    st.session_state.student_email = ""
+    
+student_info = {
+    "Nicole": {"full_name": "Nicole Wang", "email": "cw3715@nyu.edu"},
+    "Lucy": {"full_name": "Lucy Liu", "email": "nicolecheyennew@gmail.com"},
+}
+
 
 st.title('Capstone 2 Midterm Feedback')
 
 # Function to create a block for each evaluation rubric
 def create_evaluation_block(rubric_name, description, score_name, improvement_name, strength_name):
     st.header(rubric_name)
-    st.markdown(description)
+    st.markdown(description, unsafe_allow_html=True)  # Enable HTML rendering
     score_options = ['Select'] + [str(num) for num in range(1, 11)]
     score = st.radio(score_name, options=score_options, key=f"score_{rubric_name}", horizontal=True)
-    improvement = st.text_area("Points to Consider for Improvement", key=f"improve_{rubric_name}")
-    strength = st.text_area("Areas of Strength", key=f"strength_{rubric_name}")
+    improvement = st.text_area("Points to Consider for Improvement (<1000 words)", key=f"improve_{rubric_name}")
+    strength = st.text_area("Areas of Strength (<1000 words)", key=f"strength_{rubric_name}")
     return score, improvement, strength
 
 
 # Input fields
 col1, col2 = st.columns([1, 1])
 with col1:
-    instructor_name = st.text_input("Instructor Name", placeholder="Enter the instructor's name")
+    instructor_name = st.text_input("Feedback Provider", placeholder="Enter the feedback provider's name")
 
 col3, col4 = st.columns(2)
 with col3:
-    student_name = st.text_input("Student Name", placeholder="Enter the student's name", key='student_name')
+    student_name = st.text_input("Student First Name", placeholder="Enter the student's first name", key='student_name')
 with col4:
-    project_name = st.text_input("Project Name", placeholder="Enter the project name")
+    project_name = st.text_input("Project Name (can be short abbreviations)", placeholder="Enter the project name")
 
 
 # Detailed rubric descriptions with formatting
 rubrics = {
     "1.Evidence of Value Creation": """
     **User/prototype testing process that supports your insights and value map including how you are measuring that value and impact. Use of Prototypes & MVP to test.**
+    <br><br><span style="color:red;">Suggested Rubrics Only (not all required)</span>
     - Validation of customer/user needs
     - Benchmarking against existing solutions
     - Quantitative metrics/data demonstrating improvement
@@ -39,6 +68,7 @@ rubrics = {
     """,
     "2.Connection to Business Context": """
     **Understanding of Commercial context and demand for solution**
+    <br><br><span style="color:red;">Suggested Rubrics Only (not all required)</span>
     - Market analysis - size, competitors, trends
     - Brandenburger Value map (not value proposition canvas)
     - Business model canvas (if advised by mentor)
@@ -49,6 +79,7 @@ rubrics = {
     """,
     "3.Spoken Presentation": """
     **Current ability to present your project to others**
+    <br><br><span style="color:red;">Suggested Rubrics Only (not all required)</span>
     - Clarity of speech and enunciation
     - Pacing and ability to stay within time constraints
     - Poise and presence
@@ -56,6 +87,7 @@ rubrics = {
     """,
     "4.Visual Communication and Design": """
     **How the visual communication impacts understanding.**
+    <br><br><span style="color:red;">Suggested Rubrics Only (not all required)</span>
     - Visual appeal - use of color, images, layout, and white space to clearly communicate
     - Clarity and readability of charts/graphs/diagrams
     - Use of appropriate consistent formatting
@@ -63,14 +95,30 @@ rubrics = {
     """
 }
 
+
 # Create blocks for each evaluation rubric and collect scores and feedback
 scores_and_feedback = [create_evaluation_block(rubric, description, f"Score for {rubric}", f"Improvement for {rubric}", f"Strength for {rubric}") for rubric, description in rubrics.items()]
 
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.units import inch
 
-def generate_pdf(data, scores_feedback):
+
+# Logic for dynamically updating full name and email based on student's first name input
+student_name_keyed = student_name.strip().capitalize()  # Normalize the input for matching
+matching_full_name, matching_email = "", ""
+
+if student_name_keyed in student_info:
+    matching_full_name = student_info[student_name_keyed]["full_name"]
+    matching_email = student_info[student_name_keyed]["email"]
+
+
+
+
+
+
+
+
+
+# Define the generate_pdf function to handle a list of tuples
+def generate_pdf(data, scores_feedback_tuples):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
@@ -84,7 +132,7 @@ def generate_pdf(data, scores_feedback):
     # Helper function to add paragraphs to the Story list with dynamic spacing
     def add_paragraph(text, style, space_after=0.1):
         Story.append(Paragraph(text, style))
-        Story.append(Spacer(1, space_after * inch))  # Dynamically add vertical space after each paragraph
+        Story.append(Spacer(1, space_after * inch))
 
     # Basic Info
     add_paragraph(f"<b>Instructor Name:</b> {data['Instructor Name']}", bold_style)
@@ -92,99 +140,124 @@ def generate_pdf(data, scores_feedback):
     add_paragraph(f"<b>Project Name:</b> {data['Project Name']}", bold_style, space_after=0.2)
 
     # Scores, Improvements, and Strengths
-    for rubric_index, (rubric, details) in enumerate(scores_feedback.items(), start=1):
-        score, improvement, strength = details
-        add_paragraph(f"<b>{rubric} - Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
-        add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'None'}", normal_style)
-        add_paragraph(f"<b>Strength:</b> {strength if strength else 'None'}", normal_style, space_after=0.2 if rubric_index < len(scores_feedback) else 0.1)
+    for score_info in scores_feedback_tuples:
+        score, improvement, strength = score_info  # Unpacking each tuple
+        add_paragraph(f"<b>Score:</b> {score if score != 'Select' else 'Not Selected'}", bold_style)
+        add_paragraph(f"<b>Improvement:</b> {improvement if improvement else 'No Comment'}", normal_style)
+        add_paragraph(f"<b>Strength:</b> {strength if strength else 'No Comment'}", normal_style, space_after=0.1)
 
     doc.build(Story)
     buffer.seek(0)
     return buffer.getvalue()
 
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 
-# Function to send email
+
+# Email sending function
 def send_email(student_email, pdf_data):
-    # Email configuration
-    from_email = "cw3715@nyu.edu"  # Change this to your email address
-    password = "wcptonmscvnffuut"  # Change this to your email password
+    from_email = "cw3715@nyu.edu"
+    password = "wcptonmscvnffuut"
     to_email = student_email
-
-    # Create a multipart message
     msg = MIMEMultipart()
     msg['From'] = from_email
     msg['To'] = to_email
     msg['Subject'] = "Capstone 2 Midterm Feedback"
-
-    # Attach the PDF to the email
-    part = MIMEBase('application', 'octet-stream')
-    part.set_payload(pdf_data)
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', 'attachment; filename="Capstone_Feedback.pdf"')
-    msg.attach(part)
-
-    # Connect to the SMTP server and send the email
-    # Connect to the SMTP server and send the email
-   
-
+    attachment = MIMEApplication(pdf_data, Name="Capstone_Feedback.pdf")
+    attachment['Content-Disposition'] = 'attachment; filename="Capstone_Feedback.pdf"'
+    msg.attach(attachment)
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(from_email, password)
-            server.sendmail(from_email, to_email, msg.as_string())
-            st.success("Email sent successfully!")
+            server.send_message(msg)
     except Exception as e:
         st.error(f"Failed to send email: {e}")
-        print(f"Failed to send email: {e}")
+        
+        
+        
+def append_data_to_sheet(data):
+    scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('capstone-417207-e0f9a1db59e5.json', scope)
+    client = gspread.authorize(creds)
+    sheet = client.open('capstone2mid').sheet1  # Replace with your sheet's name
+
+    # Find the first empty row
+    all_rows = sheet.get_all_values()
+    first_empty_row = len(all_rows) + 1  # Add 1 because row indices start at 1
+
+    # Construct the range string for the update
+    # Assuming 'data' is a list of values you want to insert in a single row
+    update_range = f"A{first_empty_row}"  # Starts from column A, adjust if needed
+
+    # Update the sheet with data starting from the first empty row
+    sheet.update(update_range, [data])  # Data needs to be a list of lists for a row
 
 
-# Submit Review Button
-if st.button('Submit Review', key='submit_review'):
-    # Check required fields: student name and that all scores are selected
-    if student_name and all(score != 'Select' for score, _, _ in scores_and_feedback):
+     
+
+# Collect scores and feedback for each evaluation rubric
+scores_feedback_tuples = []
+for score_data in scores_and_feedback:
+    score, improvement, strength = score_data  # Unpack the tuple for each rubric
+    scores_feedback_tuples.append((score, improvement, strength))
+
+# Generate feedback and email logic
+if st.button('Generate Feedback', key='submit_review'):
+    if student_name and all(score_data[0] != 'Select' for score_data in scores_feedback_tuples):
+        # Gather the input data
         review_data = {
             "Instructor Name": instructor_name,
             "Student Name": student_name,
             "Project Name": project_name,
         }
 
-        # Prepare scores, improvements, and strengths
-        scores_feedback_dict = {}
-        for rubric, (score, improvement, strength) in zip(rubrics.keys(), scores_and_feedback):
-            scores_feedback_dict[rubric] = (score, improvement if improvement else "None", strength if strength else "None")
+        # Store scores and feedback in session state
+        st.session_state['scores_feedback_tuples'] = scores_feedback_tuples
 
-        # Generate PDF
-        pdf_bytes = generate_pdf(review_data, scores_feedback_dict)
+        # Generate PDF and store the bytes
+        pdf_bytes = generate_pdf(review_data, scores_feedback_tuples)
+        st.session_state['pdf_bytes'] = pdf_bytes
+        st.download_button("Download Review PDF", pdf_bytes, f"{student_name}_review.pdf", "application/pdf")
 
-        # Provide a download link for the PDF
-        st.download_button(
-            label="Download Review PDF",
-            data=pdf_bytes,
-            file_name=f"{student_name}_review.pdf",
-            mime="application/pdf"
-        )
+        # Indicate that the review has been generated
+        st.session_state.review_submitted = True
 
-        # Email input field
-        student_email = st.text_input("Enter Your Email Address", key='student_email')
-
-        # Send email button
-        if st.button("Send Email"):
-            if student_email:
-                # Send email with PDF attachment
-                send_email(student_email, pdf_bytes)
-                st.success("Email sent successfully!")
-            else:
-                st.error("Please enter your email address.")
+        # Update full name and email based on student's input
+        st.session_state.inferred_full_name = matching_full_name
+        st.session_state.student_email = matching_email
     else:
-        # If required fields are missing
-        st.error("Please fill in all required fields (student name and all scores). Ensure no score is set to 'Select'.")
+        st.error("Please fill in all required fields (Student First Name and all Scores).")
 
+# Display the Email sending functionality only after review submission
+if st.session_state.review_submitted:
+    # Display the student's full name for confirmation, not editable
+    st.text(f"Student Full Name: {st.session_state.inferred_full_name}")
 
+    # Allow editing of the email field
+    edited_email = st.text_input("Student Email", value=st.session_state.student_email, key='student_email_editable')
 
+    # Send Email button
+    if st.button("Send Email", key='send_email'):
+        if edited_email:
+            try:
+                send_email(edited_email, st.session_state['pdf_bytes'])
+                st.success(f"Email sent successfully to {edited_email}")
 
+                # Now append data to the Google Sheet
+                if 'scores_feedback_tuples' in st.session_state:
+                    # Combine all data to be appended to the Google Sheet
+                    sheet_data = [
+                        instructor_name,
+                        student_name,
+                        project_name
+                    ] + [item for tup in st.session_state['scores_feedback_tuples'] for item in tup] + [datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+                    append_data_to_sheet(sheet_data)
 
+                    # Clear the session state after appending to the sheet
+                    del st.session_state['scores_feedback_tuples']
+                    del st.session_state['pdf_bytes']
+                    st.session_state.review_submitted = False  # Reset the flag to allow new submissions
 
+            except Exception as e:
+                st.error(f"Failed to send email: {e}")
+        else:
+            st.error("Please make sure the student's email address is filled in.")
