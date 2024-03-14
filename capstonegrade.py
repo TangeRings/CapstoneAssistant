@@ -192,8 +192,8 @@ def append_data_to_sheet(data):
 scores_feedback_tuples = []
 
 # Iterate over the rubrics and corresponding feedback
-for rubric_name in rubrics.keys():
-    score, improvement, strength = scores_and_feedback[rubric_name]  # Assuming scores_and_feedback matches rubrics
+for item in scores_and_feedback:
+    rubric_name, score, improvement, strength = item  # Assuming scores_and_feedback matches rubrics
     scores_feedback_tuples.append((rubric_name, score, improvement, strength))
 
 
