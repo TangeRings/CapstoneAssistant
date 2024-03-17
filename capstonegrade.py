@@ -32,7 +32,7 @@ if 'student_email' not in st.session_state:
  
  # Add your email list    
 def load_student_info():
-    with open('student_info.json') as f:
+    with open('studentemail.json') as f:
         student_info = json.load(f)
     return student_info
 
