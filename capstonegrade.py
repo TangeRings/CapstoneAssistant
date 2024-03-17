@@ -28,31 +28,8 @@ if 'student_email' not in st.session_state:
     st.session_state.student_email = ""
     
 student_info = {
-    "Nicole": {"full_name": "Nicole Wang", "email": "cw3715@nyu.edu"},
-    "Lucy": {"full_name": "Lucy Liu", "email": "nicolecheyennew@gmail.com"},
-    "Amy": {"full_name": "Amy Chen", "email": "yc4815@nyu.edu"},
-    "Angela": {"full_name": "Angela Fu", "email": "jf4268@nyu.edu"},
-    "Aura": {"full_name": "Aura Liu", "email": "xl3688@nyu.edu"},
-    "Christina": {"full_name": "Christina Chung", "email": "cc6418@nyu.edu"},
-    "Elena": {"full_name": "Elena Welsch", "email": "ew2224@nyu.edu"},
-    "Ian": {"full_name": "Ian Zheng", "email": "yz6745@nyu.edu"},
-    "IreneL": {"full_name": "Irene Lu", "email": "il2123@nyu.edu"}, # Added L to differentiate from another Irene
-    "Julieta": {"full_name": "Julieta Vazquez Martinez", "email": "jv2155@nyu.edu"},
-    "Kevin": {"full_name": "Kevin Dai", "email": "kd2443@nyu.edu"},
-    "Mia": {"full_name": "Mia Cai", "email": "xc2144@nyu.edu"},
-    "William": {"full_name": "William Liang", "email": "wl2252@nyu.edu"},
-    "Shanet": {"full_name": "shanet yang", "email": "sy2960@nyu.edu"},
-    "Bhavya": {"full_name": "Bhavya Bharadwaj", "email": "bb3162@nyu.edu"},
-    "Joleen": {"full_name": "Joleen Ancheta", "email": "aja640@nyu.edu"},
-    "BillieJean": {"full_name": "Billie Jean (Jean)", "email": "bjb462@nyu.edu"},
-    "Andrew": {"full_name": "Andrew Li", "email": "al6675@nyu.edu"},
-    "Connor": {"full_name": "Connor LaJaunie", "email": "ccl9316@nyu.edu"},
-    "Sabrina": {"full_name": "Sabrina Kim", "email": "sjk9587@nyu.edu"},
-    "Zishan": {"full_name": "Zishan Qiu (Sherry)", "email": "zq2053@nyu.edu"},
-    "Irene": {"full_name": "Irene", "email": "ik2208@nyu.edu"},
-    "Summer": {"full_name": "Summer", "email": "svw5554@nyu.edu"},
-    "Beau": {"full_name": "Beau Lersakrussamee", "email": "nl2162@nyu.edu"},
-    "Dhruv": {"full_name": "Dhruv Vaishnav", "email": "dmv309@nyu.edu"}
+    "Nicole": {"full_name": "Nicole Wang", "email": "nicolewag@example.edu"},
+    "Lucy": {"full_name": "Lucy Liu", "email": "lucyliu@example.com"},
 }
 
 
