@@ -18,6 +18,7 @@ The purpose of this project is to help college students and instructors manage t
 - Data saved to Google Spreadsheets for progress tracking and AI analysis
 - Autofill student names for email after the feedback is generated
 - Download the feedback form in pdf format to local computers
+- App deployment through Streamlit
 
   
   
