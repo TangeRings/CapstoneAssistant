@@ -156,8 +156,8 @@ def generate_pdf(data, scores_feedback):
 # Email sending function
 # Put your email and App password here
 def send_email(student_email, pdf_data):
-    from_email = st.secrets["EMAIL_ADDRESS"]
-    password = st.secrets["EMAIL_PASSWORD"]
+    from_email = st.secrets["Email"]["EMAIL_ADDRESS"]
+    password = st.secrets["Email"]["EMAIL_PASSWORD"]
     to_email = student_email
     msg = MIMEMultipart()
     msg['From'] = from_email
