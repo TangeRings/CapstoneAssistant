@@ -15,6 +15,9 @@ from email import encoders
 import json
 from google.oauth2.service_account import Credentials
 import gspread
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
 # Initialize session state variables
@@ -28,11 +31,12 @@ if 'student_email' not in st.session_state:
     st.session_state.student_email = ""
  
  # Add your email list    
-student_info = {
-    "Nicole": {"full_name": "Nicole Wang", "email": "nicolewag@example.edu"},
-    "Lucy": {"full_name": "Lucy Liu", "email": "lucyliu@example.com"},
-}
+def load_student_info():
+    with open('student_info.json') as f:
+        student_info = json.load(f)
+    return student_info
 
+student_info = load_student_info()
 
 
 st.title('Capstone 2 Midterm Feedback')
@@ -152,8 +156,8 @@ def generate_pdf(data, scores_feedback):
 # Email sending function
 # Put your email and App password here
 def send_email(student_email, pdf_data):
-    from_email = "nicolewang@example.edu"
-    password = "put your password here"
+    from_email = st.secrets["EMAIL_ADDRESS"]
+    password = st.secrets["EMAIL_PASSWORD"]
     to_email = student_email
     msg = MIMEMultipart()
     msg['From'] = from_email
