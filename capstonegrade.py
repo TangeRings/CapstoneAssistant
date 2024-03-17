@@ -26,7 +26,8 @@ if 'inferred_full_name' not in st.session_state:
     st.session_state.inferred_full_name = ""
 if 'student_email' not in st.session_state:
     st.session_state.student_email = ""
-    
+ 
+ # Add your email list    
 student_info = {
     "Nicole": {"full_name": "Nicole Wang", "email": "nicolewag@example.edu"},
     "Lucy": {"full_name": "Lucy Liu", "email": "lucyliu@example.com"},
@@ -149,9 +150,10 @@ def generate_pdf(data, scores_feedback):
 
 
 # Email sending function
+# Put your email and App password here
 def send_email(student_email, pdf_data):
-    from_email = "cw3715@nyu.edu"
-    password = "wcptonmscvnffuut"
+    from_email = "nicolewang@example.edu"
+    password = "put your password here"
     to_email = student_email
     msg = MIMEMultipart()
     msg['From'] = from_email
@@ -168,6 +170,8 @@ def send_email(student_email, pdf_data):
         st.error(f"Failed to send email: {e}")
         
         
+
+#Name your google API keys as gcp_service_account and copy them to Streamlit Keys
         
 def append_data_to_sheet(data):
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
@@ -194,7 +198,6 @@ scores_feedback_tuples = []
 for item in scores_and_feedback:
     rubric_name, score, improvement, strength = item
     scores_feedback_tuples.append((rubric_name, score, improvement, strength))
-
 
 
 
